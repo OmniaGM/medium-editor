@@ -767,6 +767,8 @@ if (typeof module === 'object') {
 
         hideToolbarActions: function () {
             this.keepToolbarAlive = false;
+            this.anchorInput.value = '';
+            this.anchorForm.classList.remove('medium-editor-anchor-has-error');
             if (this.toolbar !== undefined) {
                 this.toolbar.classList.remove('medium-editor-toolbar-active');
             }
@@ -774,16 +776,27 @@ if (typeof module === 'object') {
 
         showToolbarActions: function () {
             var self = this,
-                timer;
-            this.anchorForm.style.display = 'none';
-            this.toolbarActions.style.display = 'block';
-            this.keepToolbarAlive = false;
-            clearTimeout(timer);
-            timer = setTimeout(function () {
-                if (self.toolbar && !self.toolbar.classList.contains('medium-editor-toolbar-active')) {
-                    self.toolbar.classList.add('medium-editor-toolbar-active');
-                }
-            }, 100);
+                timer, 
+                re = /^((http|https)?:\/\/)?([\da-z\.\-]+)\.([a-z\.]{2,6})([\/\w \.\-]*)*\/?$/; 
+            
+            if (this.options.checkLinkFormat &&
+                this.anchorForm.style.display === 'block' &&
+                this.anchorInput.value.length !== 0 &&
+                (!this.anchorInput.value.match(re))
+                ) {
+                this.anchorInput.focus();
+            }
+            else {
+                this.anchorForm.style.display = 'none';
+                this.toolbarActions.style.display = 'block';
+                this.keepToolbarAlive = false;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    if (self.toolbar && !self.toolbar.classList.contains('medium-editor-toolbar-active')) {
+                        self.toolbar.classList.add('medium-editor-toolbar-active');
+                    }
+                }, 100);
+            }
         },
 
         showAnchorForm: function (link_value) {
@@ -1002,11 +1015,16 @@ if (typeof module === 'object') {
         },
 
         checkLinkFormat: function (value) {
-            var re = /^https?:\/\//;
+            var re = /^((http|https)?:\/\/)?([\da-z\.\-]+)\.([a-z\.]{2,6})([\/\w \.\-]*)*\/?$/; 
             if (value.match(re)) {
-                return value;
+                this.anchorForm.classList.remove('medium-editor-anchor-has-error');            
+                if (value.match(/^https?:\/\//)) {
+                    return value;
+                }
+                return "http://" + value ;
             }
-            return "http://" + value;
+            this.anchorForm.classList.add('medium-editor-anchor-has-error');            
+            return value;
         },
 
         setTargetBlank: function () {
@@ -1025,14 +1043,18 @@ if (typeof module === 'object') {
         createLink: function (input) {
             restoreSelection(this.savedSelection);
             if (this.options.checkLinkFormat) {
-                input.value = this.checkLinkFormat(input.value);
+                if (input.value.length !== 0) {
+                    input.value = this.checkLinkFormat(input.value);
+                }
             }
-            document.execCommand('createLink', false, input.value);
-            if (this.options.targetBlank) {
-                this.setTargetBlank();
+            if (!this.anchorForm.classList.contains('medium-editor-anchor-has-error')) {
+                document.execCommand('createLink', false, input.value);
+                if (this.options.targetBlank) {
+                    this.setTargetBlank();
+                }
+                this.showToolbarActions();
+                input.value = '';
             }
-            this.showToolbarActions();
-            input.value = '';
         },
 
         bindWindowActions: function () {
