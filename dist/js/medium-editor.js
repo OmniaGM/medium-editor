@@ -460,12 +460,10 @@ if (typeof module === 'object') {
                 i;
 
             this.checkSelectionWrapper = function (e) {
-
                 // Do not close the toolbar when bluring the editable area and clicking into the anchor form
                 if (e && self.clickingIntoArchorForm(e)) {
                     return false;
                 }
-
                 clearTimeout(timer);
                 timer = setTimeout(function () {
                     self.checkSelection();
@@ -776,17 +774,15 @@ if (typeof module === 'object') {
 
         showToolbarActions: function () {
             var self = this,
-                timer, 
-                re = /^((http|https)?:\/\/)?([\da-z\.\-]+)\.([a-z\.]{2,6})([\/\w \.\-]*)*\/?$/; 
-            
+                timer;            
             if (this.options.checkLinkFormat &&
-                this.anchorForm.style.display === 'block' &&
-                (!this.anchorInput.value.match(re))
+                this.anchorForm.classList.contains('medium-editor-anchor-has-error')
                 ) {
                 this.anchorInput.focus();
             }
             else {
                 this.anchorForm.style.display = 'none';
+                this.anchorForm.classList.remove('medium-editor-anchor-has-error');
                 this.toolbarActions.style.display = 'block';
                 this.keepToolbarAlive = false;
                 clearTimeout(timer);
@@ -838,6 +834,7 @@ if (typeof module === 'object') {
 
 
         hideAnchorPreview: function () {
+            this.anchorForm.classList.remove('medium-editor-anchor-has-error');
             this.anchorPreview.classList.remove('medium-editor-anchor-preview-active');
         },
 
@@ -1040,11 +1037,11 @@ if (typeof module === 'object') {
         },
 
         createLink: function (input) {
-            restoreSelection(this.savedSelection);
             if (this.options.checkLinkFormat) {
                 input.value = this.checkLinkFormat(input.value);
             }
             if (!this.anchorForm.classList.contains('medium-editor-anchor-has-error')) {
+                restoreSelection(this.savedSelection);
                 document.execCommand('createLink', false, input.value);
                 if (this.options.targetBlank) {
                     this.setTargetBlank();
