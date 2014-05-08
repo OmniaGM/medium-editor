@@ -1157,6 +1157,7 @@ if (typeof module === 'object') {
             var i,
                 activatePlaceholder = function (el) {
                     if (!(el.querySelector('img')) &&
+                            !(el.querySelector('blockquote')) &&
                             el.textContent.replace(/^\s+|\s+$/g, '') === '') {
                         el.classList.add('medium-editor-placeholder');
                     }
