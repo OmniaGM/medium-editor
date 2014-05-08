@@ -783,7 +783,6 @@ if (typeof module === 'object') {
             
             if (this.options.checkLinkFormat &&
                 this.anchorForm.style.display === 'block' &&
-                this.anchorInput.value.length !== 0 &&
                 (!this.anchorInput.value.match(re))
                 ) {
                 this.anchorInput.focus();
@@ -1045,9 +1044,7 @@ if (typeof module === 'object') {
         createLink: function (input) {
             restoreSelection(this.savedSelection);
             if (this.options.checkLinkFormat) {
-                if (input.value.length !== 0) {
-                    input.value = this.checkLinkFormat(input.value);
-                }
+                input.value = this.checkLinkFormat(input.value);
             }
             if (!this.anchorForm.classList.contains('medium-editor-anchor-has-error')) {
                 document.execCommand('createLink', false, input.value);
